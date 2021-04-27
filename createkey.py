@@ -1,49 +1,89 @@
 import random
 
 especial = [".", "?", " ", "!", "\"", "-", "_", "ç", ","]
+decoder = {}
+encoder = {}
+
+max_range = 10+26*2+len(especial)
+
+def start_decoder():
+    i = 0
+    #numbers
+    bot = ord("0")
+    for j in range(10):
+        decoder[ i ] = chr( bot+j )
+        encoder[ chr( bot+j ) ] = i
+        i+=1
+
+    #capital
+    bot = ord("A")
+    for j in range(26):
+        decoder[ i ] = chr( bot+j )
+        encoder[ chr( bot+j ) ] = i
+        i+=1
+
+    #lower
+    bot = ord("a")
+    for j in range(26):
+        decoder[ i ] = chr( bot+j )
+        encoder[ chr( bot+j ) ] = i
+        i+=1
+
+    #especial
+    for c in especial:
+        decoder[i] = c
+        encoder[c] = i
+        i+=1
 
 def create_disk():
-    used = []
-    for i in range(26):
-        used.append( chr(i+65) )
-        used.append( chr( i+97 ) )
+    temp = list( range(max_range) )
+    random.shuffle(temp)
+    return temp
 
-    for s in especial:
-        used.append( s )
-
-    random.shuffle(used)
-
-    return used
-
-def to_disk(used):
+def to_disk( arr ):
     s = ""
-    for i in range(len(used)):
-        s += str(ord( used[i] )) + " "
+    for i in arr:
+        s += str(i) + " "
     return s
+
 
 def to_plugboard(config):
     s = ""
     i = 0
-    p = 0
-    for i in range(26):
-        s += chr(i+65) + "-" + config[p] + "\n"
-        s += chr(i+97) + "-" + config[p+1] + "\n"
-        p += 2
+    #numbers
+    bot = ord("0")
+    for j in range(10):
+        s += chr( bot+j ) + "-" + decoder[config[i]] + '\n'
+        i += 1
 
-    for st in especial:
-        s += st + "-" + config[i] + "\n"
-        i+=1
+    #capital
+    bot = ord("A")
+    for j in range(26):
+        s += chr( bot+j ) + "-" + decoder[config[i]] + '\n'
+        i += 1
+
+    #lower
+    bot = ord("a")
+    for j in range(26):
+        s += chr( bot+j ) + "-" + decoder[config[i]] + '\n'
+        i += 1
+
+    #especial
+    for c in especial:
+        s += c + "-" + decoder[config[i]] + '\n'
+        i += 1
     
     return s
 
 def pick_disks ( disks ):
-    random.shuffle(disk_choices)
-    temp = disk_choices[0]
-    disk_choices.append( temp )
-    disk_choices.remove(temp)
+    random.shuffle(disks)
+    temp = disks[0]
+    disks = disks[1:]
     return temp
 
 if __name__ == "__main__":
+
+    start_decoder()
 
     #build disks
     disk1 = to_disk( create_disk() )
@@ -68,10 +108,8 @@ if __name__ == "__main__":
     print("Created a plugboard:\n", plug_board)
 
     #chose trigerpoints
-    max_range = 26*2+len(especial)
     disk1_trigerpoint = random.randint(0,max_range)
     disk2_trigerpoint = random.randint(0,max_range)
-    disk3_trigerpoint = random.randint(0,max_range)
 
     #chose disks
     disk_choices = [0,1,2,3,4]
@@ -85,10 +123,9 @@ if __name__ == "__main__":
     disk2_start = random.randint(0,max_range)
     disk3_start = random.randint(0,max_range)
 
-    print( "Chose disk trigerpoints: {disk1} {disk2} {disk3}".format(
+    print( "Chose disk trigerpoints: {disk1} {disk2}".format(
         disk1 = disk1_trigerpoint,
-        disk2 = disk2_trigerpoint,
-        disk3 = disk3_trigerpoint
+        disk2 = disk2_trigerpoint
     ))
 
     print("Chose_disks: {disk1} {disk2} {disk3}".format(
@@ -111,10 +148,9 @@ if __name__ == "__main__":
             disk3 = disk3_pick
         ))
 
-        file.write( "disk_triger_points: {disk1} {disk2} {disk3}\n".format(
+        file.write( "disk_triger_points: {disk1} {disk2}\n".format(
             disk1 = disk1_trigerpoint,
             disk2 = disk2_trigerpoint,
-            disk3 = disk3_trigerpoint
         ))
 
         file.write( "disk_start: {disk1} {disk2} {disk3}\n".format(
@@ -126,11 +162,11 @@ if __name__ == "__main__":
         file.write("plug_board:\n")
         file.write(plug_board)
 
-        file.write("reflector:\n")
+        file.write("reflector: ")
         file.write(reflector)
-        pass
+        file.write("\n")
 
-    with open("disks.dk", "w") as file:
+        file.write("disks:\n")
         file.write(disk1 + "\n")
         file.write(disk2 + "\n")
         file.write(disk3 + "\n")
